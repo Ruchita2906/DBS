@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { assets } from '../assets/assets';
 
 const Footer = () => {
@@ -18,10 +19,18 @@ const Footer = () => {
         <div>
           <h3 className="text-lg font-semibold mb-3">Company</h3>
           <ul className="space-y-2 text-sm text-gray-700">
-            <li className="hover:text-gray-900 cursor-pointer">Home</li>
-            <li className="hover:text-gray-900 cursor-pointer">About Us</li>
-            <li className="hover:text-gray-900 cursor-pointer">Contact Us</li>
-            <li className="hover:text-gray-900 cursor-pointer">Privacy Policy</li>
+            <li>
+              <Link to="/" className="hover:text-gray-900">Home</Link>
+            </li>
+            <li>
+              <Link to="/about" className="hover:text-gray-900">About Us</Link>
+            </li>
+            <li>
+              <Link to="/contact" className="hover:text-gray-900">Contact Us</Link>
+            </li>
+            <li>
+              <Link to="/privacy-policy" className="hover:text-gray-900">Privacy Policy</Link>
+            </li>
           </ul>
         </div>
 
@@ -35,7 +44,7 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Copyright text */}
+      {/* Copyright */}
       <div className="border-t border-gray-300 mt-8 pt-4 text-center text-xs text-gray-500">
         © {new Date().getFullYear()} MedCare. All rights reserved.
       </div>

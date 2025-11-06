@@ -6,9 +6,48 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
 
-  const onSubmitHandler = async (event) => {
+  const onSubmitHandler = (event) => {
     event.preventDefault();
-    console.log({ name, email, password, state });
+
+    if (state === "Sign Up") {
+      // Get existing users from localStorage
+      const users = JSON.parse(localStorage.getItem("users")) || [];
+
+      // Check if email already exists
+      const userExists = users.find((user) => user.email === email);
+      if (userExists) {
+        alert("User already exists! Please log in.");
+        setState("Login");
+        return;
+      }
+
+      // Add new user
+      const newUser = { name, email, password };
+      users.push(newUser);
+
+      // Save to localStorage
+      localStorage.setItem("users", JSON.stringify(users));
+      localStorage.setItem("loggedInUser", JSON.stringify(newUser));
+
+      alert("Account created successfully!");
+      setName("");
+      setEmail("");
+      setPassword("");
+      setState("Login");
+    } else {
+      // Login mode
+      const users = JSON.parse(localStorage.getItem("users")) || [];
+      const validUser = users.find(
+        (user) => user.email === email && user.password === password
+      );
+
+      if (validUser) {
+        localStorage.setItem("loggedInUser", JSON.stringify(validUser));
+        alert(`Welcome back, ${validUser.name || "User"}!`);
+      } else {
+        alert("Invalid email or password!");
+      }
+    }
   };
 
   return (
@@ -22,8 +61,7 @@ const Login = () => {
           {state === "Sign Up" ? "Create Account" : "Login"}
         </h2>
         <p className="text-sm text-gray-500 mb-4">
-          Please {state === "Sign Up" ? "sign up" : "log in"} to book
-          appointment
+          Please {state === "Sign Up" ? "sign up" : "log in"} to book an appointment.
         </p>
 
         {/* Full Name (only for Sign Up) */}
