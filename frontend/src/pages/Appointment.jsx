@@ -3,6 +3,8 @@ import { useParams } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import { assets } from '../assets/assets';
 import RelatedDoctors from '../components/RelatedDoctors';
+import Slider from "react-slick";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // Helper function to get the next 7 days
 const getNext7Days = () => {
@@ -26,8 +28,33 @@ const TIME_SLOTS = [
   "10:00 am", "10:30 am", "11:00 am", "11:30 am",
   "12:00 pm", "12:30 pm", "1:00 pm", "1:30 pm",
   "2:00 pm", "2:30 pm", "3:00 pm", "3:30 pm",
-  "4:00 pm", "4:30 pm", "5:00 pm", "5:30 pm" 
+  "4:00 pm", "4:30 pm", "5:00 pm", "5:30 pm"
 ];
+
+// Custom Arrow Components for Slider
+const SampleNextArrow = (props) => {
+  const { onClick } = props;
+  return (
+    <div
+      className="absolute right-[-15px] top-1/2 transform -translate-y-1/2 cursor-pointer z-10 bg-blue-500 text-white rounded-full p-2"
+      onClick={onClick}
+    >
+      <ChevronRight size={20} />
+    </div>
+  );
+};
+
+const SamplePrevArrow = (props) => {
+  const { onClick } = props;
+  return (
+    <div
+      className="absolute left-[-15px] top-1/2 transform -translate-y-1/2 cursor-pointer z-10 bg-blue-500 text-white rounded-full p-2"
+      onClick={onClick}
+    >
+      <ChevronLeft size={20} />
+    </div>
+  );
+};
 
 const Appointment = () => {
   const { docId } = useParams();
@@ -47,6 +74,26 @@ const Appointment = () => {
   if (!docInfo) return <p>Loading...</p>;
 
   const days = getNext7Days();
+
+  const lastAvailableDate = days[days.length - 1].dateObj.toLocaleDateString('en-US', {
+    weekday: 'long', month: 'long', day: 'numeric'
+  });
+
+  // Slider settings for time slots
+  const sliderSettings = {
+    dots: false,
+    infinite: false,
+    speed: 400,
+    slidesToShow: 5,
+    slidesToScroll: 2,
+    nextArrow: <SampleNextArrow />,
+    prevArrow: <SamplePrevArrow />,
+    responsive: [
+      { breakpoint: 1024, settings: { slidesToShow: 4, slidesToScroll: 2 } },
+      { breakpoint: 768, settings: { slidesToShow: 3, slidesToScroll: 1 } },
+      { breakpoint: 480, settings: { slidesToShow: 2, slidesToScroll: 1 } },
+    ],
+  };
 
   return (
     <div className="flex flex-col items-center w-full px-2 md:px-0">
@@ -90,7 +137,16 @@ const Appointment = () => {
 
       {/* Booking slots section */}
       <div className="w-full max-w-3xl mt-8">
-        <h3 className="font-semibold text-base md:text-lg mb-4">Booking slots</h3>
+        <h3 className="font-semibold text-base md:text-lg mb-2">Booking slots</h3>
+
+        {/* Notice message */}
+        <div className="bg-blue-50 border border-blue-200 text-blue-700 text-sm rounded-md p-3 mb-4 flex items-center gap-2">
+          <img src={assets.info_icon} alt="info" className="w-4 h-4" />
+          <span>
+            We accept appointment bookings only for the next 7 days (up to {lastAvailableDate}).
+          </span>
+        </div>
+
         {/* Date buttons */}
         <div className="flex gap-2 mb-6 overflow-x-auto scrollbar-hide">
           {days.map((d, idx) => (
@@ -107,22 +163,27 @@ const Appointment = () => {
             </button>
           ))}
         </div>
-        {/* Scrollable time slots row, scrollbar hidden */}
-        <div className="flex gap-2 mb-6 overflow-x-auto scrollbar-hide">
-          {TIME_SLOTS.map((slot, idx) => (
-            <button
-              key={idx}
-              className={`min-w-[90px] px-4 md:px-5 py-2 rounded-full border transition-all shrink-0
-                ${selectedTimeIdx === idx
-                  ? "bg-blue-500 text-white border-blue-600 font-semibold"
-                  : "bg-gray-100 text-gray-800 border-gray-200"
-                }`}
-              onClick={() => setSelectedTimeIdx(idx)}
-            >
-              {slot}
-            </button>
-          ))}
+
+        {/* Time slots slider */}
+        <div className="relative mb-6">
+          <Slider {...sliderSettings}>
+            {TIME_SLOTS.map((slot, idx) => (
+              <div key={idx} className="px-1">
+                <button
+                  className={`w-full px-4 py-2 md:px-5 rounded-full border transition-all
+                    ${selectedTimeIdx === idx
+                      ? "bg-blue-500 text-white border-blue-600 font-semibold"
+                      : "bg-gray-100 text-gray-800 border-gray-200"
+                    }`}
+                  onClick={() => setSelectedTimeIdx(idx)}
+                >
+                  {slot}
+                </button>
+              </div>
+            ))}
+          </Slider>
         </div>
+
         <button
           className="bg-blue-600 text-white w-full md:w-auto px-7 py-3 rounded-full font-bold hover:bg-blue-700 transition-all"
           onClick={() => {
@@ -135,9 +196,8 @@ const Appointment = () => {
         </button>
       </div>
 
-      {/* listing releted doctors  */}
+      {/* Related doctors section */}
       <RelatedDoctors docId={docId} speciality={docInfo.speciality} />
-      
     </div>
   );
 };
